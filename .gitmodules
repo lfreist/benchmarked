@@ -1,0 +1,9 @@
+[submodule "third_party/timed"]
+	path = third_party/timed
+	url = https://github.com/lfreist/timed
+[submodule "third_party/googletest"]
+	path = third_party/googletest
+	url = https://github.com/google/googletest
+[submodule "third_party/hwinfo"]
+	path = third_party/hwinfo
+	url = https://github.com/lfreist/hwinfo.git

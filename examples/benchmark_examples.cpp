@@ -23,8 +23,12 @@ BENCHMARK("sleeping", "example", "sleep for 100 ms", 5) {
 
 class ExampleFixture : public virtual benchmarked::Fixture {
  protected:
-  std::string _haystack = "This is some text containing a special word named keyword.";
+  std::string _haystack;
   std::string _needle = "keyword";
+
+  void SetUp() override {
+    _haystack = "This is some text containing a special word named keyword.";
+  }
 };
 
 BENCHMARK_FIXTURE(ExampleFixture, "search for keyword", "example", "search using a fixture", 5) {

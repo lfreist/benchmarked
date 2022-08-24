@@ -30,6 +30,7 @@ class BenchmarkBase {
   friend class ConsoleReporter;
   friend class CSVReporter;
   friend class JSONReporter;
+  friend class CompareReporter;
  public:
   explicit BenchmarkBase(const std::string &name, const std::string &type, const std::string &description, uint64_t iterations)
     : _name(name), _type(type), _description(description), _iterations(iterations) {}

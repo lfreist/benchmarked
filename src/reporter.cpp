@@ -7,7 +7,6 @@
 
 #include "hwinfo/hwinfo.h"
 
-
 namespace benchmarked {
 
 // ===== ConsoleReporter ===============================================================================================
@@ -16,14 +15,14 @@ namespace benchmarked {
 ConsoleReporter::ConsoleReporter(std::ostream &ostream) : _stream(ostream) {}
 
 // _____________________________________________________________________________________________________________________
-void ConsoleReporter::ReportInit(const std::string& launcherName) {
+void ConsoleReporter::ReportInit(const std::string &launcherName) {
   hwinfo::CPU cpu;
   hwinfo::RAM ram;
   _stream << "\nBenchmark Report: " << launcherName << '\n'
           << "================================================================================\n"
           << "--- HARDWARE -------------------------------------------------------------------\n"
           << "CPU model:       " << cpu.modelName() << "\n"
-          << "CPU cores:       " << cpu.numLogicalCores() << " (" << cpu.numCores() << ")\n"
+          << "CPU cores:       " << cpu.numLogicalCores() << " (" << cpu.numPhysicalCores() << ")\n"
           << "CPU clock speed: " << cpu.regularClockSpeedMHz() << " (" << cpu.maxClockSpeedMHz() << ") MHz\n"
           << "RAM size:        " << (static_cast<double>(ram.totalSizeBytes()) / 1000 / 1000 / 1000) << " GiB\n"
           << "================================================================================\n"
@@ -37,12 +36,13 @@ void ConsoleReporter::ReportBenchmark(BenchmarkBase *benchmark) {
     _stream << "No Results collected..." << std::endl;
     return;
   }
-  std::vector<timed::Time> cpuTimes;
-  std::vector<timed::Time> wallTimes;
 
-  for (auto& res: benchmark->_results) {
-    if (res.wallTime.getNanoseconds() != 0) { wallTimes.push_back(res.wallTime); }
-    if (res.cpuTime.getNanoseconds() != 0) { cpuTimes.push_back(res.cpuTime); }
+  std::vector<double> cpuTimes_ms;
+  std::vector<double> wallTimes_ms;
+
+  for (auto &res: benchmark->_results) {
+    if (res.wallTime.getNanoseconds() != 0) { wallTimes_ms.push_back(res.wallTime.getMilliseconds()); }
+    if (res.cpuTime.getNanoseconds() != 0) { cpuTimes_ms.push_back(res.cpuTime.getMilliseconds()); }
   }
 
   _stream << "--------------------------------------------------------------------------------\n"
@@ -50,54 +50,72 @@ void ConsoleReporter::ReportBenchmark(BenchmarkBase *benchmark) {
           << "Description:     " << benchmark->_description << "\n"
           << "Iterations:      " << benchmark->_iterations << "\n";
   if (benchmark->_iterations > 1) {
-    if (!cpuTimes.empty()) {
+    if (!cpuTimes_ms.empty()) {
       _stream << "  -------------------------------- CPU Time ------------------------------------\n"
-              << "  min:           " << timed::utils::min(cpuTimes).getMilliseconds() << "ms\n"
-              << "  max:           " << timed::utils::max(cpuTimes).getMilliseconds() << "ms\n"
-              << "  mean:          " << timed::utils::mean(cpuTimes).getMilliseconds() << "ms\n"
-              << "  median:        " << timed::utils::median(cpuTimes).getMilliseconds() << "ms\n"
-              << "  % err          " << timed::utils::medianAbsolutePercentError(cpuTimes) << "\n";
+              << "  min:           " << timed::utils::min(cpuTimes_ms) << " ms\n"
+              << "  max:           " << timed::utils::max(cpuTimes_ms) << " ms\n"
+              << "  mean:          " << timed::utils::mean(cpuTimes_ms) << " ms\n"
+              << "  median:        " << timed::utils::median(cpuTimes_ms) << " ms\n"
+              << "  % err          " << timed::utils::medianAbsolutePercentError(cpuTimes_ms) << "\n";
     }
-    if (!wallTimes.empty()) {
+    if (!wallTimes_ms.empty()) {
       _stream << "  ------------------------------- WALL Time ------------------------------------\n"
-              << "  min:           " << timed::utils::min(wallTimes).getMilliseconds() << "ms\n"
-              << "  max:           " << timed::utils::max(wallTimes).getMilliseconds() << "ms\n"
-              << "  mean:          " << timed::utils::mean(wallTimes).getMilliseconds() << "ms\n"
-              << "  median:        " << timed::utils::median(wallTimes).getMilliseconds() << "ms\n"
-              << "  % err          " << timed::utils::medianAbsolutePercentError(wallTimes) << "\n";
+              << "  min:           " << timed::utils::min(wallTimes_ms) << " ms\n"
+              << "  max:           " << timed::utils::max(wallTimes_ms) << " ms\n"
+              << "  mean:          " << timed::utils::mean(wallTimes_ms) << " ms\n"
+              << "  median:        " << timed::utils::median(wallTimes_ms) << " ms\n"
+              << "  % err          " << timed::utils::medianAbsolutePercentError(wallTimes_ms) << "\n";
     }
-    _stream << std::flush;
   }
   else {
-    if (!cpuTimes.empty()) {
+    if (!cpuTimes_ms.empty()) {
       _stream << "  -------------------------------- CPU Time ------------------------------------\n"
-              << "  cpu time:      " << cpuTimes[0].format("%ss%ms.%nsms") << "\n";
+              << "  cpu time:      " << cpuTimes_ms[0] << " ms\n";
     }
-    if (!wallTimes.empty()) {
+    if (!wallTimes_ms.empty()) {
       _stream << "  ------------------------------- WALL Time ------------------------------------\n"
-              << "  wall time:     " << wallTimes[0].format("%ss%ms.%nsms") << "\n";
+              << "  wall time:     " << wallTimes_ms[0] << " ms\n";
     }
-    _stream << std::flush;
   }
+  _stream << std::flush;
 }
 
 // ===== CSVReporter ===================================================================================================
 // ----- public --------------------------------------------------------------------------------------------------------
 // _____________________________________________________________________________________________________________________
 void CSVReporter::ReportInit(const std::string &launcherName) {
-  _stream << "name" << _separator << "description" << _separator << "iterations" << _separator << "cpu-min"
-          << _separator << "cpu-max" << _separator << "cpu-mean" << _separator << "cpu-median" << _separator
-          << "cpu-%err" << _separator << "wall-min" << _separator << "wall-max" << _separator << "wall-mean"
-          << _separator << "wall-median" << _separator << "wall-%err";
+  _stream << "name" << _separator << "description" << _separator << "iterations" << _separator << "cpu-min [ns]"
+          << _separator << "cpu-max [ns]" << _separator << "cpu-mean [ns]" << _separator << "cpu-median [ns]"
+          << _separator
+          << "cpu-%err" << _separator << "wall-min [ns]" << _separator << "wall-max [ns]" << _separator
+          << "wall-mean [ns]"
+          << _separator << "wall-median [ns]" << _separator << "wall-%err\n";
 }
 
 // _____________________________________________________________________________________________________________________
 void CSVReporter::ReportBenchmark(BenchmarkBase *benchmark) {
-  _stream << benchmark->_name << _separator << benchmark->_description << _separator << benchmark->_iterations << _separator << "cpu-min"
-          << _separator << "cpu-max" << _separator << "cpu-mean" << _separator << "cpu-median" << _separator
-          << "cpu-%err" << _separator << "wall-min" << _separator << "wall-max" << _separator << "wall-mean"
-          << _separator << "wall-median" << _separator << "wall-%err";
-  // TODO: finish
+  if (benchmark->_results.empty()) {
+    _stream << _separator << _separator << _separator << _separator << _separator << _separator << _separator
+            << _separator << _separator << _separator << _separator << _separator << '\n';
+    _stream << std::flush;
+    return;
+  }
+  std::vector<uint64_t> cpuTimes_ns;
+  std::vector<uint64_t> wallTimes_ns;
+
+  for (auto &res: benchmark->_results) {
+    if (res.wallTime.getNanoseconds() != 0) { wallTimes_ns.push_back(res.wallTime.getNanoseconds()); }
+    if (res.cpuTime.getNanoseconds() != 0) { cpuTimes_ns.push_back(res.cpuTime.getNanoseconds()); }
+  }
+  _stream << benchmark->_name << _separator << benchmark->_description << _separator << benchmark->_iterations
+          << _separator << timed::utils::min(cpuTimes_ns)
+          << _separator << timed::utils::max(cpuTimes_ns) << _separator << timed::utils::mean(cpuTimes_ns) << _separator
+          << timed::utils::median(cpuTimes_ns) << _separator
+          << timed::utils::medianAbsolutePercentError(cpuTimes_ns) << _separator << timed::utils::min(wallTimes_ns)
+          << _separator << timed::utils::max(wallTimes_ns) << _separator << timed::utils::mean(wallTimes_ns)
+          << _separator << timed::utils::median(wallTimes_ns) << _separator
+          << timed::utils::medianAbsolutePercentError(wallTimes_ns) << "\n";
+  _stream << std::flush;
 }
 
 // ===== CompareReporter ===============================================================================================

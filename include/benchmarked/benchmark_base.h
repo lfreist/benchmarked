@@ -4,8 +4,10 @@
 #pragma once
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <memory>
+#include <functional>
 
 #include "timed/TimeUtils.h"
 
@@ -32,8 +34,8 @@ class BenchmarkBase {
   friend class JSONReporter;
   friend class CompareReporter;
  public:
-  explicit BenchmarkBase(const std::string &name, const std::string &type, const std::string &description, uint64_t iterations)
-    : _name(name), _type(type), _description(description), _iterations(iterations) {}
+  explicit BenchmarkBase(const std::string &name, const std::string &type, const std::string &description, uint64_t iterations, std::function<void()> cleanUp)
+    : _name(name), _type(type), _description(description), _iterations(iterations), _cleanUp(std::move(cleanUp)) {}
   virtual ~BenchmarkBase() = default;
 
   virtual void Launch() = 0;
@@ -44,6 +46,7 @@ class BenchmarkBase {
   std::string _name;
   std::string _type;
   std::string _description;
+  std::function<void()> _cleanUp;
   std::vector<Result> _results;
 };
 

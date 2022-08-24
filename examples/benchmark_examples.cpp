@@ -1,6 +1,9 @@
 // Copyright Leon Freist
 // Author Leon Freist <freist@informatik.uni-freiburg.de>
 
+#include <thread>
+#include <chrono>
+
 #include "benchmarked/benchmarked.h"
 
 BENCHMARK("fibonacci_100", "example", "compute first 100 fibonacci numbers starting at third", 5) {
@@ -12,6 +15,10 @@ BENCHMARK("fibonacci_100", "example", "compute first 100 fibonacci numbers start
     t1 = t2;
     t2 = tmp;
   }
+}
+
+BENCHMARK("sleeping", "example", "sleep for 100 ms", 5) {
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 class ExampleFixture : public virtual benchmarked::Fixture {

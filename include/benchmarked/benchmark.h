@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "functional"
+
 #include "benchmarked/fixture.h"
 #include "benchmarked/benchmark_base.h"
 
@@ -16,7 +18,8 @@ class Benchmark : public BenchmarkBase, public virtual Fixture {
   explicit Benchmark(const std::string &name,
                      const std::string &type = "",
                      const std::string &description = "",
-                     uint64_t iterations = 1) : BenchmarkBase(name, type, description, iterations) {}
+                     uint64_t iterations = 1,
+                     std::function<void()> cleanUp = [](){}) : BenchmarkBase(name, type, description, iterations, std::move(cleanUp)) {}
   Benchmark(const Benchmark &) = delete;
   Benchmark(Benchmark &&) = delete;
   ~Benchmark() override = default;

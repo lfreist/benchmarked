@@ -21,8 +21,14 @@ class Fixture {
   Fixture& operator=(Fixture&&) noexcept = default;
 
  protected:
+  // only called once for all benchmark iterations
+  virtual void SetUp() {}
+  // called before every benchmark iteration
   virtual void Initialize() {}
-  virtual void Cleanup() {}
+  // called after every benchmark iteration
+  virtual void Reset() {}
+  // only called once after all benchmark iterations
+  virtual void CleanUp() {}
 };
 
 }  // namespace benchmarked

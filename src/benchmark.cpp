@@ -13,8 +13,12 @@ void Benchmark::Launch() {
   timed::WallTimer wall_timer;
   timed::CPUTimer cpu_timer;
 
+  Fixture::SetUp();
+
   for (uint64_t iteration = 0; iteration < _iterations; ++iteration) {
     Fixture::Initialize();
+
+    _cleanUp();
 
     wall_timer.start();
     cpu_timer.start();
@@ -26,8 +30,10 @@ void Benchmark::Launch() {
 
     _results.emplace_back(cpu_timer.getTime(), wall_timer.getTime());
 
-    Fixture::Cleanup();
+    Fixture::Reset();
   }
+
+  Fixture::CleanUp();
   _launched = true;
 }
 

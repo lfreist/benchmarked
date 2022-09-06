@@ -92,9 +92,9 @@ namespace CppBenchmark { Internal::BenchmarkRegistrator BENCHMARK_UNIQUE_NAME(be
 
 #define BENCHMARKED
 #ifdef BENCHMARKED
-#define CODE_BENCHMARK_START(name) benchmarked::Internal::CodeBenchmarkRegistrator::start(name);
-#define CODE_BENCHMARK_STOP(name) benchmarked::Internal::CodeBenchmarkRegistrator::stop(name);
-#define CODE_BENCHMARK_REPORT() benchmarked::Internal::CodeBenchmarkRegistrator::report();
+#define CODE_BENCHMARK_START(name) benchmarked::Internal::CodeBenchmarkRegistrator::start(name)
+#define CODE_BENCHMARK_STOP(name) benchmarked::Internal::CodeBenchmarkRegistrator::stop(name)
+#define CODE_BENCHMARK_REPORT() benchmarked::Internal::CodeBenchmarkRegistrator::report()
 #else
 #define CODE_BENCHMARK_START(name)
 #define CODE_BENCHMARK_STOP(name)

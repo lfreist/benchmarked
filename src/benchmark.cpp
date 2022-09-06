@@ -79,14 +79,22 @@ void CodeBenchmark::stop() {
 // ----- << ------------------------------------------------------------------------------------------------------------
 // _____________________________________________________________________________________________________________________
 std::ostream &operator<<(std::ostream &os, const CodeBenchmark &c_bm) {
-  std::cout << c_bm._resultPairs.size() << " " << (c_bm._resultPairs.size() == 1 ? "thread" : "threads") << ":\n";
+  os << c_bm._resultPairs.size() << " " << (c_bm._resultPairs.size() == 1 ? "thread" : "threads") << ":\n";
+  double total;
   for (const auto &[key, value]: c_bm._resultPairs) {
-    double total;
+    double total_thread_time;
     for (const auto &pair: value) {
-      total += double((pair.second - pair.first).count());
+      auto time = double((pair.second - pair.first).count());
+      total_thread_time += time;
     }
-    std::cout << total / 1000.0 / 1000.0 << " ms\n";
+    total += total_thread_time;
+    if (value.size() > 1) {
+      os << "  " << total_thread_time / 1000.0 / 1000.0 << " ms\n";
+    }
   }
+  os << "  --------\n";
+  os << "  " << total / 1000.0 / 1000.0 << " ms" << std::endl;
+  return os;
 }
 
 // ===== CodeBenchmarkHandler ==========================================================================================

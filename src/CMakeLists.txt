@@ -4,6 +4,6 @@ add_library(Benchmarked
         reporter.cpp
         system.cpp
         )
-target_link_libraries(Benchmarked PUBLIC chrono timed::TimeUtils timed::Timer)
+target_link_libraries(Benchmarked PUBLIC boost_chrono timed::TimeUtils timed::Timer)
 
 add_library(${PROJECT_NAME}::Benchmarked ALIAS Benchmarked)

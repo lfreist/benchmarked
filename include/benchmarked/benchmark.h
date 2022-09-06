@@ -6,13 +6,12 @@
 #include <thread>
 #include <mutex>
 
+#include <boost/chrono.hpp>
+
 #include "functional"
 
 #include "benchmarked/fixture.h"
 #include "benchmarked/benchmark_base.h"
-
-#ifndef BENCHMARKED_BENCHMARK_H_
-#define BENCHMARKED_BENCHMARK_H_
 
 namespace benchmarked {
 
@@ -51,7 +50,7 @@ class CodeBenchmark {
 
  protected:
   std::mutex _pushToResultPairsMutex;
-  std::map<std::thread::id, std::vector<std::pair<std::clock_t, std::clock_t>>> _resultPairs;
+  std::map<std::thread::id, std::vector<std::pair<boost::chrono::thread_clock::time_point, boost::chrono::thread_clock::time_point>>> _resultPairs;
 };
 
 std::ostream &operator<<(std::ostream &os, const CodeBenchmark &c_bm);
@@ -62,14 +61,12 @@ class CodeBenchmarkHandler {
   void Report();
   static CodeBenchmarkHandler& GetInstance();
 
-  void start(unsigned id);
-  void stop(unsigned id);
+  void start(const std::string &name);
+  void stop(const std::string &name);
 
  private:
   CodeBenchmarkHandler() = default;
-  std::map<unsigned, CodeBenchmark> _benchmarks;
+  std::map<const std::string, CodeBenchmark> _benchmarks;
 };
 
-}  // namspace benchmarked
-
-#endif //BENCHMARKED_BENCHMARK_H_
+}  // namespace benchmarked

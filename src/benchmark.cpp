@@ -1,7 +1,6 @@
 // Copyright Leon Freist
 // Author Leon Freist <freist@informatik.uni-freiburg.de>
 
-#include <ctime>
 #include <iostream>
 
 #include "benchmarked/benchmark.h"
@@ -46,30 +45,33 @@ void Benchmark::Launch() {
 void CodeBenchmark::start() {
   std::unique_lock locker(_pushToResultPairsMutex);
   auto &res_vector = _resultPairs[std::this_thread::get_id()];
+  auto now = boost::chrono::thread_clock::now();
   if (res_vector.empty()) {
-    res_vector.push_back({std::clock(), 0});
+    res_vector.push_back({now, now});
     return;
   }
-  if (res_vector.back().second == 0) {
+  if (res_vector.back().second == res_vector.back().first) {
     throw std::runtime_error(
-        "Starting dynamic benchmark failed, since there already is a timer running for this thread on this benchmark id"
+      "Starting dynamic benchmark failed, since there already is a timer running for this thread on this benchmark id"
     );
   } else {
-    res_vector.push_back({std::clock(), 0});
+    res_vector.push_back({now, now});
   }
 }
 
 // _____________________________________________________________________________________________________________________
 void CodeBenchmark::stop() {
   std::unique_lock locker(_pushToResultPairsMutex);
+  auto now = boost::chrono::thread_clock::now();
   auto &res_vector = _resultPairs[std::this_thread::get_id()];
   if (res_vector.empty()) { return; }
   auto &pair = res_vector.back();
-  if (pair.second == 0) {
-    pair.second = std::clock();
-  } else {
+  if (pair.second == pair.first) {
+    pair.second = now;
+  }
+  else {
     throw std::runtime_error(
-        "Stopping code benchmark failed, since this benchmark id has not started a timer on this thread yet."
+      "Stopping code benchmark failed, since this benchmark id has not started a timer on this thread yet."
     );
   }
 }
@@ -77,16 +79,13 @@ void CodeBenchmark::stop() {
 // ----- << ------------------------------------------------------------------------------------------------------------
 // _____________________________________________________________________________________________________________________
 std::ostream &operator<<(std::ostream &os, const CodeBenchmark &c_bm) {
+  std::cout << c_bm._resultPairs.size() << " " << (c_bm._resultPairs.size() == 1 ? "thread" : "threads") << ":\n";
   for (const auto &[key, value]: c_bm._resultPairs) {
-    std::cout << "Thread: " << key << ":\n";
     double total;
     for (const auto &pair: value) {
-      double time = 1000.0 * static_cast<double>(pair.second - pair.first) / CLOCKS_PER_SEC;
-      total += time;
-      std::cout << "  " << time * 1000.0 * 1000.0
-                << " ns\n";
+      total += double((pair.second - pair.first).count());
     }
-    std::cout << " total: " << total * 1000 * 1000 << " ns\n";
+    std::cout << total / 1000.0 / 1000.0 << " ms\n";
   }
 }
 
@@ -95,7 +94,7 @@ std::ostream &operator<<(std::ostream &os, const CodeBenchmark &c_bm) {
 // _____________________________________________________________________________________________________________________
 void CodeBenchmarkHandler::Report() {
   for (const auto &[key, value]: _benchmarks) {
-    std::cout << value << std::endl;
+    std::cout << key << " - " << value << std::endl;
   }
 }
 
@@ -106,13 +105,13 @@ CodeBenchmarkHandler &CodeBenchmarkHandler::GetInstance() {
 }
 
 // _____________________________________________________________________________________________________________________
-void CodeBenchmarkHandler::start(unsigned int id) {
-  _benchmarks[id].start();
+void CodeBenchmarkHandler::start(const std::string &name) {
+  _benchmarks[name].start();
 }
 
 // _____________________________________________________________________________________________________________________
-void CodeBenchmarkHandler::stop(unsigned int id) {
-  _benchmarks[id].stop();
+void CodeBenchmarkHandler::stop(const std::string &name) {
+  _benchmarks[name].stop();
 }
 
 }  // namespace benchmarked

@@ -23,8 +23,8 @@ void ConsoleReporter::ReportInit(const std::string &launcherName) {
           << "--- HARDWARE -------------------------------------------------------------------\n"
           << "CPU model:       " << cpu.modelName() << "\n"
           << "CPU cores:       " << cpu.numLogicalCores() << " (" << cpu.numPhysicalCores() << ")\n"
-          << "CPU clock speed: " << cpu.regularClockSpeedMHz() << " (" << cpu.maxClockSpeedMHz() << ") MHz\n"
-          << "RAM size:        " << (static_cast<double>(ram.totalSizeBytes()) / 1000 / 1000 / 1000) << " GiB\n"
+          << "CPU clock speed: " << cpu.regularClockSpeed_kHz() << " (" << cpu.maxClockSpeed_kHz() << ") MHz\n"
+          << "RAM size:        " << (static_cast<double>(ram.totalSize_Bytes()) / 1000 / 1000 / 1000) << " GiB\n"
           << "================================================================================\n"
           << "--- BENCHMARKS -----------------------------------------------------------------\n"
           << std::flush;

@@ -15,6 +15,11 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(MAIN_PROJECT ON)
 endif()
 
+# --- BOOST ------------------------------------------------------------------------------------------------------------
+find_package(Boost 1.74 REQUIRED COMPONENTS program_options)
+include_directories(${Boost_INCLUDE_DIR})
+# ----------------------------------------------------------------------------------------------------------------------
+
 add_subdirectory(third_party/timed)
 include_directories(third_party/timed/include)
 

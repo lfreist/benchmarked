@@ -11,9 +11,6 @@
 
 #include "timed/Timer.h"
 
-#ifndef BENCHMARKED_H_
-#define BENCHMARKED_H_
-
 namespace benchmarked::Internal {
 
 class BenchmarkRegistrator {
@@ -25,13 +22,13 @@ class BenchmarkRegistrator {
 
 class CodeBenchmarkRegistrator {
  public:
-  static void start(unsigned id) {
+  static void start(const std::string &name) {
     CodeBenchmarkHandler& instance = CodeBenchmarkHandler::GetInstance();
-    instance.start(id);
+    instance.start(name);
   }
-  static void stop(unsigned id) {
+  static void stop(const std::string &name) {
     CodeBenchmarkHandler& instance = CodeBenchmarkHandler::GetInstance();
-    instance.stop(id);
+    instance.stop(name);
   }
 
   static void report() {
@@ -93,15 +90,13 @@ void benchmarked::BENCHMARK_UNIQUE_NAME(__benchmark__)::Run()
 namespace CppBenchmark { Internal::BenchmarkRegistrator BENCHMARK_UNIQUE_NAME(benchmark_registrator)([]() { return std::make_shared<type>(__VA_ARGS__); }); }
 
 
-#define COMPILE_BENCHMARKS
-#ifdef COMPILE_BENCHMARKS
-#define CODE_BENCHMARK_START(id) benchmarked::Internal::CodeBenchmarkRegistrator::start(id);
-#define CODE_BENCHMARK_STOP(id) benchmarked::Internal::CodeBenchmarkRegistrator::stop(id);
+#define BENCHMARKED
+#ifdef BENCHMARKED
+#define CODE_BENCHMARK_START(name) benchmarked::Internal::CodeBenchmarkRegistrator::start(name);
+#define CODE_BENCHMARK_STOP(name) benchmarked::Internal::CodeBenchmarkRegistrator::stop(name);
 #define CODE_BENCHMARK_REPORT() benchmarked::Internal::CodeBenchmarkRegistrator::report();
 #else
-#define CODE_BENCHMARK_START(id)
-#define CODE_BENCHMARK_STOP(id)
+#define CODE_BENCHMARK_START(name)
+#define CODE_BENCHMARK_STOP(name)
 #define CODE_BENCHMARK_REPORT()
 #endif
-
-#endif //BENCHMARKED_H_

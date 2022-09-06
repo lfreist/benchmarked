@@ -88,11 +88,13 @@ std::ostream &operator<<(std::ostream &os, const CodeBenchmark &c_bm) {
       total_thread_time += time;
     }
     total += total_thread_time;
-    if (value.size() > 1) {
+    if (c_bm._resultPairs.size() > 1) {
       os << "  " << total_thread_time / 1000.0 / 1000.0 << " ms\n";
     }
   }
-  os << "  --------\n";
+  if (c_bm._resultPairs.size() > 1) {
+    os << "  --------\n";
+  }
   os << "  " << total / 1000.0 / 1000.0 << " ms" << std::endl;
   return os;
 }

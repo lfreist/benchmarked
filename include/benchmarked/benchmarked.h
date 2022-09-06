@@ -23,6 +23,18 @@ class BenchmarkRegistrator {
   }
 };
 
+class CodeBenchmarkRegistrator {
+ public:
+  static void start(unsigned id) {
+    CodeBenchmarkHandler& instance = CodeBenchmarkHandler::GetInstance();
+    instance.start(id);
+  }
+  static void stop(unsigned id) {
+    CodeBenchmarkHandler& instance = CodeBenchmarkHandler::GetInstance();
+    instance.stop(id);
+  }
+};
+
 }  // namespace benchmarked::Internal
 
 #define BENCHMARK_UNIQUE_NAME_LINE2(name, line) name##line
@@ -75,6 +87,12 @@ void benchmarked::BENCHMARK_UNIQUE_NAME(__benchmark__)::Run()
 #define BENCHMARK_CLASS(type, ...)\
 namespace CppBenchmark { Internal::BenchmarkRegistrator BENCHMARK_UNIQUE_NAME(benchmark_registrator)([]() { return std::make_shared<type>(__VA_ARGS__); }); }
 
+#ifdef BENCHMARK
+#define CPU_TIME_START(id) benchmarked::Internal::CodeBenchmarkRegistrator::start(id)
+#define CPU_TIME_STOP(id) benchmarked::Internal::CodeBenchmarkRegistrator::stop(id)
+#else
 #define CPU_TIME_START(id)
+#define CPU_TIME_STOP(id)
+#endif
 
 #endif //BENCHMARKED_H_

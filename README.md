@@ -10,7 +10,7 @@ C++ benchmarking framework
 
 ## Why benchmarked?
 1. benchmarked builds with basic cmake
-2. benchmarked is lightweight -> only 350 KiB
+2. benchmarked is lightweight -> only 350 KiB (gcc, ubuntu)
 3. less requirements (only git, cmake, c++-compiler)
 3. easy usage
 

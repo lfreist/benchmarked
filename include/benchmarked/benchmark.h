@@ -59,7 +59,7 @@ std::ostream &operator<<(std::ostream &os, const CodeBenchmark &c_bm);
 class CodeBenchmarkHandler {
   friend class CodeBenchmarkRegistrator;
  public:
-  ~CodeBenchmarkHandler();
+  void Report();
   static CodeBenchmarkHandler& GetInstance();
 
   void start(unsigned id);

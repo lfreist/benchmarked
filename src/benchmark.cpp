@@ -86,14 +86,14 @@ std::ostream &operator<<(std::ostream &os, const CodeBenchmark &c_bm) {
       std::cout << "  " << time * 1000.0 * 1000.0
                 << " ns\n";
     }
-    std::cout << " total: " << total * 1000 * 1000 << " ns";
+    std::cout << " total: " << total * 1000 * 1000 << " ns\n";
   }
 }
 
 // ===== CodeBenchmarkHandler ==========================================================================================
 // ----- public --------------------------------------------------------------------------------------------------------
 // _____________________________________________________________________________________________________________________
-CodeBenchmarkHandler::~CodeBenchmarkHandler() {
+void CodeBenchmarkHandler::Report() {
   for (const auto &[key, value]: _benchmarks) {
     std::cout << value << std::endl;
   }
@@ -103,11 +103,6 @@ CodeBenchmarkHandler::~CodeBenchmarkHandler() {
 CodeBenchmarkHandler &CodeBenchmarkHandler::GetInstance() {
   static CodeBenchmarkHandler instance;
   return instance;
-}
-
-// _____________________________________________________________________________________________________________________
-void CodeBenchmarkHandler::createCodeBenchmark(unsigned int id) {
-  _benchmarks[id];
 }
 
 // _____________________________________________________________________________________________________________________

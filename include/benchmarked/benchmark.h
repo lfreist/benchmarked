@@ -38,6 +38,7 @@ class Benchmark : public BenchmarkBase, public virtual Fixture {
 
 class CodeBenchmark {
   friend std::ostream &operator<<(std::ostream &os, const CodeBenchmark &c_bm);
+  friend class CodeBenchmarkHandler;
  public:
   CodeBenchmark() = default;
   CodeBenchmark(const CodeBenchmark&) = delete;
@@ -47,6 +48,8 @@ class CodeBenchmark {
 
   void start();
   void stop();
+
+  [[nodiscard]] std::map<std::thread::id, double> getTimePerThread() const;
 
  protected:
   std::mutex _pushToResultPairsMutex;
@@ -58,8 +61,9 @@ std::ostream &operator<<(std::ostream &os, const CodeBenchmark &c_bm);
 class CodeBenchmarkHandler {
   friend class CodeBenchmarkRegistrator;
  public:
-  void Report();
   static CodeBenchmarkHandler& GetInstance();
+
+  [[nodiscard]] std::string Report(const std::string &fmt = "console") const;
 
   void start(const std::string &name);
   void stop(const std::string &name);

@@ -31,9 +31,9 @@ class CodeBenchmarkRegistrator {
     instance.stop(name);
   }
 
-  static void report() {
+  static std::string report(const std::string &fmt) {
     CodeBenchmarkHandler& instance = CodeBenchmarkHandler::GetInstance();
-    instance.Report();
+    return instance.Report(fmt);
   }
 };
 
@@ -94,9 +94,9 @@ namespace CppBenchmark { Internal::BenchmarkRegistrator BENCHMARK_UNIQUE_NAME(be
 #ifdef BENCHMARKED
 #define CODE_BENCHMARK_START(name) benchmarked::Internal::CodeBenchmarkRegistrator::start(name)
 #define CODE_BENCHMARK_STOP(name) benchmarked::Internal::CodeBenchmarkRegistrator::stop(name)
-#define CODE_BENCHMARK_REPORT() benchmarked::Internal::CodeBenchmarkRegistrator::report()
+#define CODE_BENCHMARK_REPORT(fmt) benchmarked::Internal::CodeBenchmarkRegistrator::report(fmt)
 #else
 #define CODE_BENCHMARK_START(name)
 #define CODE_BENCHMARK_STOP(name)
-#define CODE_BENCHMARK_REPORT()
+#define CODE_BENCHMARK_REPORT(fmt)
 #endif

@@ -2,6 +2,7 @@
 // Author Leon Freist <freist@informatik.uni-freiburg.de>
 
 #include <iostream>
+#include <strstream>
 
 #include "benchmarked/benchmark.h"
 #include "timed/Timer.h"
@@ -76,20 +77,29 @@ void CodeBenchmark::stop() {
   }
 }
 
+// _____________________________________________________________________________________________________________________
+std::map<std::thread::id, double> CodeBenchmark::getTimePerThread() const {
+  std::map<std::thread::id, double> result;
+  for (const auto &[thread_id, intervals]: _resultPairs) {
+    // MARK: look up is O(log n) -> this reference might be super unnecessary...
+    auto& value = result[thread_id];
+    value = 0;
+    for (const auto &[start, end]: intervals) {
+      value += double((end - start).count());
+    }
+  }
+  return result;
+}
+
 // ----- << ------------------------------------------------------------------------------------------------------------
 // _____________________________________________________________________________________________________________________
 std::ostream &operator<<(std::ostream &os, const CodeBenchmark &c_bm) {
   os << c_bm._resultPairs.size() << " " << (c_bm._resultPairs.size() == 1 ? "thread" : "threads") << ":\n";
   double total = 0;
-  for (const auto &[key, value]: c_bm._resultPairs) {
-    double total_thread_time = 0;
-    for (const auto &pair: value) {
-      auto time = double((pair.second - pair.first).count());
-      total_thread_time += time;
-    }
-    total += total_thread_time;
+  for (const auto &[thread_id, time]: c_bm.getTimePerThread()) {
+    total += time;
     if (c_bm._resultPairs.size() > 1) {
-      os << "  " << total_thread_time / 1000.0 / 1000.0 << " ms\n";
+      os << "  " << time / 1000.0 / 1000.0 << " ms\n";
     }
   }
   if (c_bm._resultPairs.size() > 1) {
@@ -102,9 +112,40 @@ std::ostream &operator<<(std::ostream &os, const CodeBenchmark &c_bm) {
 // ===== CodeBenchmarkHandler ==========================================================================================
 // ----- public --------------------------------------------------------------------------------------------------------
 // _____________________________________________________________________________________________________________________
-void CodeBenchmarkHandler::Report() {
-  for (const auto &[key, value]: _benchmarks) {
-    std::cout << key << " - " << value << std::endl;
+std::string CodeBenchmarkHandler::Report(const std::string &fmt) const {
+  const std::string sep(",");
+  if (fmt == "csv") {
+    std::stringstream ss;
+    unsigned max_size = 0;
+    for (const auto &[name, bm]: _benchmarks) {
+      auto tmp_size = bm.getTimePerThread().size();
+      max_size = tmp_size > max_size ? tmp_size : max_size;
+    }
+    ss << "name";
+    for (unsigned i = 0; i < max_size; ++i) {
+      ss << sep << i;
+    }
+    ss << '\n';
+    for (const auto &[name, bm]: _benchmarks) {
+      ss << name;
+      unsigned nums = max_size;
+      for (const auto &[thread_id, time]: bm.getTimePerThread()) {
+        ss << sep << time;
+        nums--;
+      }
+      for (;nums > 0; --nums) {
+        ss << sep;
+      }
+      ss << '\n';
+    }
+    return ss.str();
+  }
+  else {
+    std::strstream ss;
+    for (const auto &[name, bm]: _benchmarks) {
+      ss << name << " - " << bm << std::endl;
+    }
+    return ss.str();
   }
 }
 

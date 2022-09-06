@@ -80,9 +80,9 @@ void CodeBenchmark::stop() {
 // _____________________________________________________________________________________________________________________
 std::ostream &operator<<(std::ostream &os, const CodeBenchmark &c_bm) {
   os << c_bm._resultPairs.size() << " " << (c_bm._resultPairs.size() == 1 ? "thread" : "threads") << ":\n";
-  double total;
+  double total = 0;
   for (const auto &[key, value]: c_bm._resultPairs) {
-    double total_thread_time;
+    double total_thread_time = 0;
     for (const auto &pair: value) {
       auto time = double((pair.second - pair.first).count());
       total_thread_time += time;

@@ -22,13 +22,13 @@ class BenchmarkRegistrator {
 
 class CodeBenchmarkRegistrator {
  public:
-  static void start(const std::string &name) {
+  static void start(const std::string &name, uint8_t bm_t_id) {
     CodeBenchmarkHandler& instance = CodeBenchmarkHandler::GetInstance();
-    instance.start(name);
+    instance.start(name, bm_t_id);
   }
-  static void stop(const std::string &name) {
+  static void stop(const std::string &name, uint8_t bm_t_id) {
     CodeBenchmarkHandler& instance = CodeBenchmarkHandler::GetInstance();
-    instance.stop(name);
+    instance.stop(name, bm_t_id);
   }
 
   static std::string report(const std::string &fmt) {
@@ -92,11 +92,26 @@ namespace CppBenchmark { Internal::BenchmarkRegistrator BENCHMARK_UNIQUE_NAME(be
 
 #define BENCHMARKED
 #ifdef BENCHMARKED
-#define CODE_BENCHMARK_START(name) benchmarked::Internal::CodeBenchmarkRegistrator::start(name)
-#define CODE_BENCHMARK_STOP(name) benchmarked::Internal::CodeBenchmarkRegistrator::stop(name)
+#define CODE_BENCHMARK_THREAD_CPU_START(name) benchmarked::Internal::CodeBenchmarkRegistrator::start(name, 0)
+#define CODE_BENCHMARK_THREAD_CPU_STOP(name) benchmarked::Internal::CodeBenchmarkRegistrator::stop(name, 0)
+
+#define CODE_BENCHMARK_TOTAL_CPU_START(name) benchmarked::Internal::CodeBenchmarkRegistrator::start(name, 1)
+#define CODE_BENCHMARK_TOTAL_CPU_STOP(name) benchmarked::Internal::CodeBenchmarkRegistrator::stop(name, 1)
+
+#define CODE_BENCHMARK_WALL_START(name) benchmarked::Internal::CodeBenchmarkRegistrator::start(name, 2)
+#define CODE_BENCHMARK_WALL_STOP(name) benchmarked::Internal::CodeBenchmarkRegistrator::stop(name, 2)
+
 #define CODE_BENCHMARK_REPORT(fmt) benchmarked::Internal::CodeBenchmarkRegistrator::report(fmt)
 #else
+// empty definitions
 #define CODE_BENCHMARK_START(name)
 #define CODE_BENCHMARK_STOP(name)
+
+#define CODE_BENCHMARK_TOTAL_CPU_START(name)
+#define CODE_BENCHMARK_TOTAL_CPU_STOP(name)
+
+#define CODE_BENCHMARK_WALL_START(name)
+#define CODE_BENCHMARK_WALL_STOP(name)
+
 #define CODE_BENCHMARK_REPORT(fmt)
 #endif

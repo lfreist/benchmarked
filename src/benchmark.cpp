@@ -246,7 +246,7 @@ std::string CodeBenchmarkHandler::Report(const std::string &fmt) const {
       ss << '\n';
     }
     for (const auto &[name, bm]: _wall_benchmarks) {
-      ss << "Wall" << name;
+      ss << "Wall" << sep << name;
       unsigned nums = max_size;
       for (const auto &[thread_id, time]: bm.getResults()) {
         ss << sep << time;

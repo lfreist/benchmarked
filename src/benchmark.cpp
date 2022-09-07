@@ -222,7 +222,7 @@ std::string CodeBenchmarkHandler::Report(const std::string &fmt) const {
     }
     ss << '\n';
     for (const auto &[name, bm]: _threadCPU_benchmarks) {
-      ss << "thread CPU" << name;
+      ss << "thread CPU" << sep << name;
       unsigned nums = max_size;
       for (const auto &[thread_id, time]: bm.getResults()) {
         ss << sep << time;
@@ -234,7 +234,7 @@ std::string CodeBenchmarkHandler::Report(const std::string &fmt) const {
       ss << '\n';
     }
     for (const auto &[name, bm]: _totalCPU_benchmarks) {
-      ss << "total CPU" << name;
+      ss << "total CPU" << sep << name;
       unsigned nums = max_size;
       for (const auto &[thread_id, time]: bm.getResults()) {
         ss << sep << time;

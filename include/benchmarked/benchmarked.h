@@ -98,8 +98,11 @@ namespace CppBenchmark { Internal::BenchmarkRegistrator BENCHMARK_UNIQUE_NAME(be
 #define CODE_BENCHMARK_TOTAL_CPU_START(name) benchmarked::Internal::CodeBenchmarkRegistrator::start(name, 1)
 #define CODE_BENCHMARK_TOTAL_CPU_STOP(name) benchmarked::Internal::CodeBenchmarkRegistrator::stop(name, 1)
 
-#define CODE_BENCHMARK_WALL_START(name) benchmarked::Internal::CodeBenchmarkRegistrator::start(name, 2)
-#define CODE_BENCHMARK_WALL_STOP(name) benchmarked::Internal::CodeBenchmarkRegistrator::stop(name, 2)
+#define CODE_BENCHMARK_THREAD_WALL_START(name) benchmarked::Internal::CodeBenchmarkRegistrator::start(name, 2)
+#define CODE_BENCHMARK_THREAD_WALL_STOP(name) benchmarked::Internal::CodeBenchmarkRegistrator::stop(name, 2)
+
+#define CODE_BENCHMARK_WALL_START(name) benchmarked::Internal::CodeBenchmarkRegistrator::start(name, 3)
+#define CODE_BENCHMARK_WALL_STOP(name) benchmarked::Internal::CodeBenchmarkRegistrator::stop(name, 3)
 
 #define CODE_BENCHMARK_REPORT(fmt) benchmarked::Internal::CodeBenchmarkRegistrator::report(fmt)
 #else
@@ -109,6 +112,9 @@ namespace CppBenchmark { Internal::BenchmarkRegistrator BENCHMARK_UNIQUE_NAME(be
 
 #define CODE_BENCHMARK_TOTAL_CPU_START(name)
 #define CODE_BENCHMARK_TOTAL_CPU_STOP(name)
+
+#define CODE_BENCHMARK_THREAD_WALL_START(name)
+#define CODE_BENCHMARK_THREAD_WALL_STOP(name)
 
 #define CODE_BENCHMARK_WALL_START(name)
 #define CODE_BENCHMARK_WALL_STOP(name)

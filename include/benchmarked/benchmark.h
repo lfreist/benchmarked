@@ -111,6 +111,20 @@ class CodeBenchmarkTotalCPU : public CodeBenchmark<std::clock_t> {
   [[nodiscard]] std::map<std::thread::id, double> getResults() const override;
 };
 
+class CodeBenchmarkThreadWall : public CodeBenchmark<std::chrono::time_point<std::chrono::steady_clock>> {
+ public:
+  CodeBenchmarkThreadWall() = default;
+  CodeBenchmarkThreadWall(const CodeBenchmarkThreadWall &) = delete;
+  CodeBenchmarkThreadWall(CodeBenchmarkThreadWall &&) = delete;
+  CodeBenchmarkThreadWall &operator=(const CodeBenchmarkThreadWall &) = delete;
+  CodeBenchmarkThreadWall &operator=(CodeBenchmarkThreadWall &&) = delete;
+
+  void start() override;
+  void stop() override;
+
+  [[nodiscard]] std::map<std::thread::id, double> getResults() const override;
+};
+
 
 class CodeBenchmarkWall : public CodeBenchmark<std::chrono::time_point<std::chrono::steady_clock>> {
  public:
@@ -144,6 +158,7 @@ class CodeBenchmarkHandler {
 
   std::map<const std::string, CodeBenchmarkThreadCPU> _threadCPU_benchmarks;
   std::map<const std::string, CodeBenchmarkTotalCPU> _totalCPU_benchmarks;
+  std::map<const std::string, CodeBenchmarkWall> _threadWall_benchmarks;
   std::map<const std::string, CodeBenchmarkWall> _wall_benchmarks;
 };
 

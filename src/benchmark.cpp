@@ -144,7 +144,58 @@ std::map<std::thread::id, double> CodeBenchmarkTotalCPU::getResults() const {
   return result;
 }
 
-// ===== CodeBenchmarkThreadCPU ========================================================================================
+// ===== CodeBenchmarkThreadWall ========================================================================================
+// ----- public --------------------------------------------------------------------------------------------------------
+// _____________________________________________________________________________________________________________________
+void CodeBenchmarkThreadWall::start() {
+  std::unique_lock locker(_pushToResultPairsMutex);
+  auto &res_vector = _resultPairs[std::this_thread::get_id()];
+  auto now = std::chrono::steady_clock::now();
+  if (res_vector.empty()) {
+    res_vector.push_back({now, now});
+    return;
+  }
+  if (res_vector.back().second == res_vector.back().first) {
+    throw std::runtime_error(
+        "Starting dynamic benchmark failed, since there already is a timer running for this thread on this benchmark id"
+    );
+  } else {
+    res_vector.push_back({now, now});
+  }
+}
+
+// _____________________________________________________________________________________________________________________
+void CodeBenchmarkThreadWall::stop() {
+  std::unique_lock locker(_pushToResultPairsMutex);
+  auto now = std::chrono::steady_clock::now();
+  auto &res_vector = _resultPairs[std::this_thread::get_id()];
+  if (res_vector.empty()) { return; }
+  auto &pair = res_vector.back();
+  if (pair.second == pair.first) {
+    pair.second = now;
+  }
+  else {
+    throw std::runtime_error(
+        "Stopping code benchmark failed, since this benchmark id has not started a timer on this thread yet."
+    );
+  }
+}
+
+// _____________________________________________________________________________________________________________________
+std::map<std::thread::id, double> CodeBenchmarkThreadWall::getResults() const {
+  std::map<std::thread::id, double> result;
+  for (const auto &[thread_id, intervals]: _resultPairs) {
+    // MARK: look up is O(log n) -> this reference might be super unnecessary...
+    auto& value = result[thread_id];
+    value = 0;
+    for (const auto &[start, end]: intervals) {
+      value += double((end - start).count());
+    }
+  }
+  return result;
+}
+
+// ===== CodeBenchmarkWall ========================================================================================
 // ----- public --------------------------------------------------------------------------------------------------------
 // _____________________________________________________________________________________________________________________
 void CodeBenchmarkWall::start() {
@@ -212,6 +263,10 @@ std::string CodeBenchmarkHandler::Report(const std::string &fmt) const {
       auto tmp_size = bm.getResults().size();
       max_size = tmp_size > max_size ? tmp_size : max_size;
     }
+    for (const auto &[name, bm]: _threadWall_benchmarks) {
+      auto tmp_size = bm.getResults().size();
+      max_size = tmp_size > max_size ? tmp_size : max_size;
+    }
     for (const auto &[name, bm]: _wall_benchmarks) {
       auto tmp_size = bm.getResults().size();
       max_size = tmp_size > max_size ? tmp_size : max_size;
@@ -235,6 +290,18 @@ std::string CodeBenchmarkHandler::Report(const std::string &fmt) const {
     }
     for (const auto &[name, bm]: _totalCPU_benchmarks) {
       ss << "total CPU" << sep << name;
+      unsigned nums = max_size;
+      for (const auto &[thread_id, time]: bm.getResults()) {
+        ss << sep << time;
+        nums--;
+      }
+      for (;nums > 0; --nums) {
+        ss << sep;
+      }
+      ss << '\n';
+    }
+    for (const auto &[name, bm]: _threadWall_benchmarks) {
+      ss << "Thread Wall" << sep << name;
       unsigned nums = max_size;
       for (const auto &[thread_id, time]: bm.getResults()) {
         ss << sep << time;
@@ -269,6 +336,10 @@ std::string CodeBenchmarkHandler::Report(const std::string &fmt) const {
     for (const auto &[name, bm]: _totalCPU_benchmarks) {
       ss << name << " - " << bm << std::endl;
     }
+    ss << "Thread Wall:\n";
+    for (const auto &[name, bm]: _threadWall_benchmarks) {
+      ss << name << " - " << bm << std::endl;
+    }
     ss << "Wall:\n";
     for (const auto &[name, bm]: _wall_benchmarks) {
       ss << name << " - " << bm << std::endl;
@@ -288,7 +359,8 @@ void CodeBenchmarkHandler::start(const std::string &name, uint8_t bm_t_id) {
   switch (bm_t_id) {
     case 0: _threadCPU_benchmarks[name].start(); break;
     case 1: _totalCPU_benchmarks[name].start(); break;
-    case 2: _wall_benchmarks[name].start(); break;
+    case 2: _threadWall_benchmarks[name].start(); break;
+    case 3: _wall_benchmarks[name].start(); break;
     default: break;
   }
 }
@@ -298,7 +370,8 @@ void CodeBenchmarkHandler::stop(const std::string &name, uint8_t bm_t_id) {
   switch (bm_t_id) {
     case 0: _threadCPU_benchmarks[name].stop(); break;
     case 1: _totalCPU_benchmarks[name].stop(); break;
-    case 2: _wall_benchmarks[name].stop(); break;
+    case 2: _threadWall_benchmarks[name].stop(); break;
+    case 3: _wall_benchmarks[name].stop(); break;
     default: break;
   }
 }

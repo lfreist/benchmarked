@@ -158,7 +158,7 @@ class CodeBenchmarkHandler {
 
   std::map<const std::string, CodeBenchmarkThreadCPU> _threadCPU_benchmarks;
   std::map<const std::string, CodeBenchmarkTotalCPU> _totalCPU_benchmarks;
-  std::map<const std::string, CodeBenchmarkWall> _threadWall_benchmarks;
+  std::map<const std::string, CodeBenchmarkThreadWall> _threadWall_benchmarks;
   std::map<const std::string, CodeBenchmarkWall> _wall_benchmarks;
 };
 

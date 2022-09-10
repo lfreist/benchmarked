@@ -277,10 +277,10 @@ std::string CodeBenchmarkHandler::Report(const std::string &fmt) const {
     }
     ss << '\n';
     for (const auto &[name, bm]: _threadCPU_benchmarks) {
-      ss << "thread CPU" << sep << name;
+      ss << "thread CPU [ns]" << sep << name;
       unsigned nums = max_size;
       for (const auto &[thread_id, time]: bm.getResults()) {
-        ss << sep << time;
+        ss << sep << std::llround(time);
         nums--;
       }
       for (;nums > 0; --nums) {
@@ -289,10 +289,10 @@ std::string CodeBenchmarkHandler::Report(const std::string &fmt) const {
       ss << '\n';
     }
     for (const auto &[name, bm]: _totalCPU_benchmarks) {
-      ss << "total CPU" << sep << name;
+      ss << "total CPU [ns]" << sep << name;
       unsigned nums = max_size;
       for (const auto &[thread_id, time]: bm.getResults()) {
-        ss << sep << time;
+        ss << sep << std::llround(time);
         nums--;
       }
       for (;nums > 0; --nums) {
@@ -301,10 +301,10 @@ std::string CodeBenchmarkHandler::Report(const std::string &fmt) const {
       ss << '\n';
     }
     for (const auto &[name, bm]: _threadWall_benchmarks) {
-      ss << "Thread Wall" << sep << name;
+      ss << "thread Wall [ns]" << sep << name;
       unsigned nums = max_size;
       for (const auto &[thread_id, time]: bm.getResults()) {
-        ss << sep << time;
+        ss << sep << std::llround(time);
         nums--;
       }
       for (;nums > 0; --nums) {
@@ -313,10 +313,10 @@ std::string CodeBenchmarkHandler::Report(const std::string &fmt) const {
       ss << '\n';
     }
     for (const auto &[name, bm]: _wall_benchmarks) {
-      ss << "Wall" << sep << name;
+      ss << "Wall [ns]" << sep << name;
       unsigned nums = max_size;
       for (const auto &[thread_id, time]: bm.getResults()) {
-        ss << sep << time;
+        ss << sep << std::llround(time);
         nums--;
       }
       for (;nums > 0; --nums) {

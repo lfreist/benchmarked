@@ -119,5 +119,5 @@ namespace CppBenchmark { Internal::BenchmarkRegistrator BENCHMARK_UNIQUE_NAME(be
 #define CODE_BENCHMARK_WALL_START(name)
 #define CODE_BENCHMARK_WALL_STOP(name)
 
-#define CODE_BENCHMARK_REPORT(fmt)
+#define CODE_BENCHMARK_REPORT(fmt) ""
 #endif
